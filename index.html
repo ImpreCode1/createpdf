@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>PDF IMPRESISTEM S.A.S</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Custom Google font-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100;200;300;400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
+    <!-- Cargar PptxGenJS desde CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+    <!-- Incluir PDFLib para manipulación de PDFs -->
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.min.js"></script>
+
+
+
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet" />
+</head>
+
+<body class="d-flex flex-column h-100">
+    <main class="flex-shrink-0">
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
+            <div class="container px-5 d-flex align-items-center">
+                <img src="logo2.jpg" alt="Logotipo de Impresistem" style="height: 50px; margin-right: 10px;">
+                <a class="navbar-brand">
+                    <!-- <span class="fw-bolder text-primary">IMPRESISTEM S.A.S</span> -->
+                </a>
+            </div>
+        </nav>
+        <!-- Header-->
+        <header class="py-5">
+            <div class="container px-5 pb-5">
+                <div class="row gx-5 align-items-center">
+                    <div class="col-xxl-5">
+                        <!-- Header text content-->
+                        <div class="text-center text-xxl-start">
+                            <div class="badge bg-gradient-primary-to-secondary text-white mb-4">
+                                <div class="text-uppercase">Convertir &middot; PDF</div>
+                            </div>
+                            <h1 class="display-3 fw-bolder mb-5"><span class="text-gradient d-inline"> Convierte y Une PDFs Rápidamente</span></h1>
+                        </div>
+                    </div>
+        
+                    <div class="col-md-6 col-xxl-5">
+                        <div class="d-flex justify-content-center mt-5 mt-xxl-0">
+                            <div class="profile bg-white p-3 rounded shadow-sm text-center" style=" border: 2px dashed rgb(8, 8, 198);
+  padding: 2rem;">
+                                <!-- Unir PDFs -->
+                                <h2 class="text-primary mb-3">Unir PDFs</h2>
+                                <input type="file" id="pdfFiles" class="form-control mb-2" multiple accept="application/pdf">
+                                <button class="btn btn-primary mb-3" onclick="unirPDFs()">Unir PDFs</button>
+                                <a id="downloadMerged" class="btn btn-success" style="display:none;">Descargar PDF Unido</a>
+                            
+                                <!-- Separar PDFs -->
+                                <h2 class="text-primary mt-4 mb-3">Separar PDF</h2>
+                                <input type="file" id="singlePdf" class="form-control mb-2" accept="application/pdf">
+                                <button class="btn btn-primary" onclick="separarPDF()">Separar PDF</button>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- Contenedor de "Convertir PDF a PowerPoint" -->
+                    <div class="col-md-6 col-xxl-5">
+                        <div class="d-flex justify-content-center mt-5 mt-xxl-0">
+                            <div class="profile p-3 rounded shadow-sm text-center" 
+                            style="background-color: rgb(255, 255, 255) !important; max-width: 500px; max-height: 500px; overflow: hidden; display: flex; flex-direction: column; justify-content: center;  border: 2px dashed hwb(54 0% 0%);
+  padding: 2rem;">
+                                <!-- Título de la sección de PowerPoint -->
+                                <h2 class="text-danger mb-3" style="font-size: 1.2rem; color:black">Convertir PDF a PowerPoint</h2>
+                                
+                                <!-- Entrada de archivo PDF -->
+                                <input type="file" id="pdfToPPT" class="form-control mb-2" accept="application/pdf" style="font-size: 0.9rem;">
+                                 
+                                <!-- Botón para convertir a PowerPoint -->
+                                <button class="btn btn-warning mb-3" onclick="convertirAPowerPoint()" style="font-size: 0.9rem;">Convertir a PowerPoint</button>
+                                
+           
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+
+    </main>
+    <!-- Footer-->
+    <footer class="bg-white py-4 mt-auto">
+        <div class="container px-5">
+            <div class="row align-items-center justify-content-between flex-column flex-sm-row">
+                <div class="col-auto">
+                    <div class="small m-0">Copyright &copy; Impresistem S.A.S</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script>
+        async function unirPDFs() {
+            const files = document.getElementById('pdfFiles').files;
+            if (files.length === 0) {
+                alert('Por favor, selecciona al menos dos PDFs para unir.');
+                return;
+            }
+
+            const pdfDoc = await PDFLib.PDFDocument.create();
+
+            for (let file of files) {
+                const fileData = await file.arrayBuffer();
+                const pdf = await PDFLib.PDFDocument.load(fileData, { ignoreEncryption: true });
+                const copiedPages = await pdfDoc.copyPages(pdf, pdf.getPageIndices());
+                copiedPages.forEach((page) => pdfDoc.addPage(page));
+            }
+
+            const mergedPdfBytes = await pdfDoc.save();
+            downloadFile(mergedPdfBytes, "PDF_unido.pdf");
+        }
+
+        async function separarPDF() {
+            const file = document.getElementById('singlePdf').files[0];
+            if (!file) {
+                alert('Por favor, selecciona un PDF para separar.');
+                return;
+            }
+        
+            const fileData = await file.arrayBuffer();
+            const pdf = await PDFLib.PDFDocument.load(fileData, { ignoreEncryption: true });
+        
+            // Obtener el número total de páginas del PDF
+            const totalPages = pdf.getPageCount();
+            let pagesToExtract = prompt(`Por favor ingresa las páginas que deseas descargar (ejemplo: 1,3,5):`);
+        
+            if (pagesToExtract) {
+                pagesToExtract = pagesToExtract.split(',').map(page => parseInt(page.trim()) - 1); // Convertir a índices
+        
+                // Crear un nuevo PDF con las páginas seleccionadas
+                const pdfDoc = await PDFLib.PDFDocument.create();
+                for (let pageIndex of pagesToExtract) {
+                    if (pageIndex < totalPages) {
+                        const [page] = await pdfDoc.copyPages(pdf, [pageIndex]);
+                        pdfDoc.addPage(page);
+                    }
+                }
+        
+                const pdfBytes = await pdfDoc.save();
+                downloadFile(pdfBytes, `Páginas_${pagesToExtract.join('_')}.pdf`);
+            }
+        }
+        
+
+        function downloadFile(data, filename) {
+            const blob = new Blob([data], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+
+        async function convertirAPowerPoint() {
+            const fileInput = document.getElementById('pdfToPPT');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Por favor, selecciona un archivo PDF para convertir.');
+                return;
+            }
+
+            // Leer el archivo PDF
+            const fileData = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument(fileData).promise;
+
+            // Crear una nueva presentación PowerPoint con PptxGenJS
+            const pptx = new PptxGenJS();
+
+            // Iterar a través de las páginas del PDF y agregar cada página como una diapositiva
+            const pageCount = pdf.numPages;
+            for (let i = 1; i <= pageCount; i++) {
+                const slide = pptx.addSlide(); // Agregar una diapositiva
+
+                // Obtener la página del PDF
+                const page = await pdf.getPage(i);
+
+                // Crear un canvas para renderizar la página
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                // Renderizar la página en el canvas
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+
+                const renderTask = page.render(renderContext);
+                await renderTask.promise;
+
+                // Convertir el canvas a una imagen en base64
+                const imgData = canvas.toDataURL();
+
+                // Insertar la imagen en la diapositiva de PowerPoint
+                slide.addImage({ data: imgData, x: 0, y: 0, w: '100%', h: '100%' });
+            }
+
+            // Descargar el archivo PowerPoint
+            pptx.writeFile({ fileName: 'Presentación.pptx' }).then(() => {
+                document.getElementById('downloadPPT').style.display = 'block';
+            });
+        }
+    </script>
+</body>
+
+</html>
